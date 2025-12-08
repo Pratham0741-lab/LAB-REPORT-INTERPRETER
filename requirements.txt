@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-multipart
+pydantic
+pydantic[email]
+pytesseract
+opencv-python
+Pillow
+pdf2image
+scikit-learn
+xgboost
+numpy
+pandas
+streamlit
+requests

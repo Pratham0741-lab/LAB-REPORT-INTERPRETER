@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Doc-AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- Chart.js for bar visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Background blobs -->
+    <div class="bg-gradient"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <header class="site-header">
+        <div class="brand">
+            <div class="logo-circle">🧬</div>
+            <div>
+                <h1>Doc-AI: Analyze Lab Reports at you Fingertips</h1>
+                <p>Upload your lab report and get a clear, patient-friendly explanation.</p>
+            </div>
+        </div>
+        <div class="tagline">
+            <span class="pill">OCR</span>
+            <span class="pill">Smart Analysis</span>
+            <span class="pill pill-accent">Prototype · Not Medical Advice</span>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="layout">
+            <!-- Left: Upload panel -->
+            <section class="card upload-card">
+                <h2>Upload your lab report</h2>
+                <p class="muted">
+                    Supported formats: <strong>PDF</strong>, <strong>JPG</strong>, <strong>PNG</strong>.
+                    All processing happens on this local backend.
+                </p>
+
+                <form id="upload-form">
+                    <label id="dropzone" class="dropzone">
+                        <div class="dropzone-icon">⬆</div>
+                        <div class="dropzone-text-main">Click to choose a file or drag & drop here</div>
+                        <div class="dropzone-text-sub">Scanned lab PDFs, screenshots, or phone photos</div>
+                        <input id="file-input" type="file" accept=".pdf,.png,.jpg,.jpeg" />
+                    </label>
+
+                    <p id="file-info" class="file-info"></p>
+
+                    <button type="submit" id="analyze-btn">
+                        <span id="analyze-text">Analyze report</span>
+                        <span id="loader" class="loader"></span>
+                    </button>
+                    <p id="status" class="status"></p>
+                </form>
+
+                <section class="hint-box">
+                    <h3>How it works</h3>
+                    <ol>
+                        <li>OCR reads the report text (even from scans).</li>
+                        <li>Parser detects many common blood tests.</li>
+                        <li>Risk engine estimates low / moderate / high risk.</li>
+                        <li>AI-style layer explains results in simple language.</li>
+                    </ol>
+                </section>
+            </section>
+
+            <!-- Right: Results panel -->
+            <section id="results" class="card results-card hidden">
+                <div class="results-header">
+                    <h2>2️⃣ Interpretation</h2>
+                    <span class="results-tag">Demo · For education only</span>
+                </div>
+
+                <!-- Risk summary -->
+                <section id="risk-section" class="risk-box"></section>
+
+                <!-- Chart -->
+                <section class="results-section">
+                    <div class="section-header">
+                        <h3>📊 Abnormality overview</h3>
+                        <p class="muted small">Bars show how far results deviate from typical ranges (demo only).</p>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="labs-chart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Grouped lab values -->
+                <section class="results-section">
+                    <div class="section-header">
+                        <h3>📁 Grouped lab values</h3>
+                    </div>
+                    <div id="parsed-labs" class="labs-groups">
+                        <p class="muted">Detected tests will appear here after upload.</p>
+                    </div>
+                </section>
+
+                <!-- Summary -->
+                <section class="results-section">
+                    <div class="section-header">
+                        <h3>📄 AI-style explanation</h3>
+                    </div>
+                    <div id="ai-summary" class="summary-output">
+                        <p class="muted">Once analyzed, a detailed explanation will be shown here.</p>
+                    </div>
+                </section>
+
+                <section class="disclaimer">
+                    <h4>⚠ Health disclaimer</h4>
+                    <p>
+                        This tool is a student/demo project. It cannot diagnose or treat any condition.
+                        Always discuss your reports with a licensed doctor and follow their advice.
+                    </p>
+                </section>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Backend: FastAPI · Frontend: HTML + CSS + Vanilla JS · Built for learning & experimentation.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
