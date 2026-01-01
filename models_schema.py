@@ -28,7 +28,7 @@ class MLResult(BaseModel):
     anomaly: MLAnomalyResult
     risk: MLRiskResult
     raw_features: Dict[str, float]
-    conditions: List[str] = []  # <-- new: condition tags from ml_layer
+    conditions: List[str] = []  
 
 
 class InterpretationResult(BaseModel):

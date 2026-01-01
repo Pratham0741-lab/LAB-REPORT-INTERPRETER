@@ -10,17 +10,13 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 
 def generate_pdf_report(interp, home_guidance, patient_name=""):
-    """
-    Generates a clean PDF summary of interpreted results.
-    Returns PDF bytes.
-    """
+
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
     story = []
 
-    # TITLE
     story.append(Paragraph("Lab Report – AI Interpretation", styles["Title"]))
 
     if patient_name:
@@ -34,7 +30,6 @@ def generate_pdf_report(interp, home_guidance, patient_name=""):
     )
     story.append(Spacer(1, 14))
 
-    # PANEL SEVERITY
     if interp.get("group_severity"):
         table_data = [["Panel", "Severity"]]
         for panel, sev in interp["group_severity"].items():
@@ -55,7 +50,6 @@ def generate_pdf_report(interp, home_guidance, patient_name=""):
         story.append(tbl)
         story.append(Spacer(1, 10))
 
-    # TEST DETAILS
     story.append(Paragraph("Test-wise Interpretation", styles["Heading2"]))
 
     test_data = [
@@ -85,14 +79,14 @@ def generate_pdf_report(interp, home_guidance, patient_name=""):
     story.append(t2)
     story.append(Spacer(1, 14))
 
-    # HOME GUIDANCE
+
     story.append(Paragraph("What You Can Do at Home", styles["Heading2"]))
 
     bullets = [ListItem(Paragraph(t, styles["Normal"])) for t in home_guidance]
     story.append(ListFlowable(bullets, bulletType="bullet"))
     story.append(Spacer(1, 14))
 
-    # DISCLAIMER
+
     story.append(
         Paragraph(
             "Disclaimer: This AI interpretation is for educational purposes only and "

@@ -7,10 +7,7 @@ from value_extractor import extract_value_unit
 
 
 def fuzzy_match_test(line: str) -> str:
-    """
-    Fuzzy matching to identify test name even if spelled incorrectly
-    or appears in long sentences.
-    """
+
     all_aliases = {alias: key for key, vals in TEST_ALIASES.items() for alias in vals}
     words = re.split(r"[^a-zA-Z0-9]+", line.lower())
 
@@ -23,29 +20,23 @@ def fuzzy_match_test(line: str) -> str:
 
 
 def parse_report_lines(lines: List[str]) -> Dict[str, Any]:
-    """
-    Advanced multi-line, fuzzy, robust parser for all report types.
-    """
+
     results = {}
 
     for line in lines:
         line_clean = line.strip()
 
-        # Identify test key
         test_key = fuzzy_match_test(line_clean)
         if not test_key:
             continue
 
-        # Extract value + unit
         value, unit = extract_value_unit(line_clean)
         if value is None:
             continue
 
-        # If missing unit, use default from config
         if not unit:
             unit = TEST_CONFIG[test_key]["unit"]
 
-        # Save result
         results[test_key] = {
             "raw_line": line_clean,
             "value": value,
@@ -56,10 +47,7 @@ def parse_report_lines(lines: List[str]) -> Dict[str, Any]:
 
 
 def interpret_results_advanced(page_texts: List[str]):
-    """
-    End-to-end interpretation using the upgraded parser.
-    """
-    # Combine all pages into lines
+
     lines = []
     for page in page_texts:
         for row in page.split("\n"):
@@ -68,7 +56,6 @@ def interpret_results_advanced(page_texts: List[str]):
 
     parsed = parse_report_lines(lines)
 
-    # Map every test to severity
     interpreted = []
     group_severity = {}
     rank = {"Normal": 0, "Mild": 1, "Moderate": 2, "Severe": 3}
@@ -100,13 +87,11 @@ def interpret_results_advanced(page_texts: List[str]):
             "raw_line": obj["raw_line"]
         })
 
-        # Group-level severity
         g = cfg["group"]
         prev = group_severity.get(g, "Normal")
         if rank[sev] > rank[prev]:
             group_severity[g] = sev
 
-    # Overall severity
     if interpreted:
         worst = max(rank[t["severity"]] for t in interpreted)
         overall = ["Normal", "Mild", "Moderate", "Severe"][worst]

@@ -1,14 +1,11 @@
-# backend/ml_layer.py
+# ml_layer.py
 from typing import Dict, Any, List
 
 from interpretation_config import LAB_METADATA
 
 
 def _compute_risk(parsed_labs: Dict[str, float]) -> Dict[str, Any]:
-    """
-    Compare each lab with reference ranges to produce a simple overall
-    risk estimate. This is *not* a diagnosis, just a heuristic signal.
-    """
+
     if not parsed_labs:
         return {
             "anomaly": {"is_anomalous": False, "score": 0.0},
@@ -58,25 +55,15 @@ def _compute_risk(parsed_labs: Dict[str, float]) -> Dict[str, Any]:
 
 
 def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
-    """
-    Very simple rule-based condition tagging.
-    This is *only* for tailoring explanations and home guidance,
-    NOT for diagnosis.
 
-    Returns a list like:
-        ["anemia", "diabetes_poor_control", "liver_issue", ...]
-    """
     conditions: List[str] = []
 
-    # Helper: safely get value
     get = parsed_labs.get
 
-    # --- Anemia pattern ---
     hb = get("hemoglobin")
     if hb is not None and hb < 12.0:
         conditions.append("anemia")
 
-    # --- Diabetes / dysglycemia pattern ---
     fg = get("fasting_glucose")
     pp = get("pp_glucose")
     hba1c = get("hba1c")
@@ -86,13 +73,11 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
     elif (fg is not None and 100 <= fg < 126) or (hba1c is not None and 5.7 <= hba1c < 6.5):
         conditions.append("diabetes_borderline")
 
-    # --- Kidney function pattern ---
     creat = get("creatinine")
     urea = get("urea")
     if (creat is not None and creat > 1.5) or (urea is not None and urea > 40):
         conditions.append("kidney_issue")
 
-    # --- Liver function pattern ---
     tb = get("total_bilirubin")
     db = get("direct_bilirubin")
     alt = get("sgpt") or get("sgpt")  # alias
@@ -107,7 +92,6 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
     ):
         conditions.append("liver_issue")
 
-    # --- Lipid profile pattern ---
     tc = get("total_cholesterol")
     tg = get("triglycerides")
     hdl = get("hdl")
@@ -120,7 +104,6 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
     ):
         conditions.append("lipid_issue")
 
-    # --- Thyroid pattern ---
     tsh = get("tsh")
     if tsh is not None:
         if tsh > 4.0:
@@ -128,13 +111,11 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
         elif tsh < 0.4:
             conditions.append("thyroid_hyper_pattern")
 
-    # --- Inflammation pattern ---
     crp = get("crp")
     esr = get("esr")
     if (crp is not None and crp > 5) or (esr is not None and esr > 20):
         conditions.append("inflammation_marker_raised")
 
-    # --- Vitamins ---
     vit_d = get("vitamin_d")
     if vit_d is not None and vit_d < 20:
         conditions.append("vitamin_d_low")
@@ -143,7 +124,6 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
     if b12 is not None and b12 < 200:
         conditions.append("vitamin_b12_low")
 
-    # Remove duplicates, keep stable order
     seen = set()
     unique_conditions: List[str] = []
     for c in conditions:
@@ -155,12 +135,7 @@ def detect_conditions(parsed_labs: Dict[str, float]) -> List[str]:
 
 
 def full_ml_analysis(parsed_labs: Dict[str, float]) -> Dict[str, Any]:
-    """
-    Main ML/rules wrapper:
-    - Computes anomaly + risk score
-    - Detects condition tags
-    - Returns everything in a single dict consumed by the API
-    """
+
     risk_parts = _compute_risk(parsed_labs)
     conditions = detect_conditions(parsed_labs)
 

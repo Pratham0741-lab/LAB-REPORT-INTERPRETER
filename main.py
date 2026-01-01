@@ -25,18 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# -------------------------------------------------------------------
-# SIMPLE FALLBACK PARSER (very basic regex-based)
-# Used only if structured parser returns almost nothing.
-# -------------------------------------------------------------------
 import re
 
 
 def simple_fallback_parser(text: str) -> Dict[str, float]:
     """
-    Very naive regex parser for a few common tests.
-    This is ONLY a backup if extract_labs_from_text() finds nothing.
+
 
     It looks for lines like:
         Hemoglobin 13.5 g/dL
@@ -84,9 +78,6 @@ def simple_fallback_parser(text: str) -> Dict[str, float]:
     return labs
 
 
-# -------------------------------------------------------------------
-# API
-# -------------------------------------------------------------------
 @app.post("/analyze_report", response_model=InterpretationResult)
 async def analyze_report(file: UploadFile = File(...)):
     # 1) Validate file type
@@ -101,33 +92,24 @@ async def analyze_report(file: UploadFile = File(...)):
             detail="Unsupported file type. Please upload a PDF, PNG or JPG.",
         )
 
-    # 2) Read bytes
     file_bytes = await file.read()
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Empty file.")
 
-    # 3) OCR layer
     ocr_raw = ocr_image_bytes(file_bytes, file_type=file_type)
     ocr_result = OCRResult(**ocr_raw)  # pages + full_text
 
-    # 4) Structured parsing => canonical lab keys
-    #    ✅ IMPORTANT: pass pages, not full_text
     parsed_labs = extract_labs_from_text(ocr_result.pages)
 
-    # If almost nothing parsed, try simple regex fallback
     if not parsed_labs or len(parsed_labs) == 0:
         fallback = simple_fallback_parser(ocr_result.full_text)
-        # merge / prefer structured parser values if any
         parsed_labs = {**fallback, **parsed_labs}
 
-    # 5) ML analysis (risk + condition tags) on parsed labs
     ml_raw = full_ml_analysis(parsed_labs)
     ml_result = MLResult(**ml_raw)
 
-    # 6) LLM-style explanation (uses parsed labs + ml_result)
     interpretation_text = generate_interpretation_full(parsed_labs, ml_raw)
 
-    # 7) Return combined response
     return InterpretationResult(
         ocr=ocr_result,
         parsed_labs=parsed_labs,

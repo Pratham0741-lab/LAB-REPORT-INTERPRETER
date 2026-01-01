@@ -5,7 +5,6 @@ from interpretation_config import LAB_METADATA
 
 
 def _format_overall_section(ml_outputs: Dict[str, Any]) -> List[str]:
-    """Create the overall risk / anomaly narrative."""
     risk = ml_outputs.get("risk", {})
     anomaly = ml_outputs.get("anomaly", {})
 
@@ -51,7 +50,6 @@ def _format_overall_section(ml_outputs: Dict[str, Any]) -> List[str]:
 
 
 def _format_per_test_section(parsed_labs: Dict[str, float]) -> List[str]:
-    """Create detailed, numeric per-test explanation."""
     lines: List[str] = []
     lines.append("## 🔍 Test-by-Test Explanation\n")
 
@@ -65,7 +63,6 @@ def _format_per_test_section(parsed_labs: Dict[str, float]) -> List[str]:
     for key, value in parsed_labs.items():
         meta = LAB_METADATA.get(key)
         if not meta:
-            # Unknown / unmapped test
             lines.append(f"### **{key}: {value}**\n")
             lines.append(
                 "- This test is not configured in this demo, so no automated interpretation is provided.\n"
@@ -79,7 +76,6 @@ def _format_per_test_section(parsed_labs: Dict[str, float]) -> List[str]:
         low_note = meta.get("low_note", "")
         high_note = meta.get("high_note", "")
 
-        # Determine status
         status = "within commonly used reference range"
         explanation = ""
         if ref_low is not None and value < ref_low:
@@ -89,7 +85,6 @@ def _format_per_test_section(parsed_labs: Dict[str, float]) -> List[str]:
             status = "above commonly used reference range"
             explanation = high_note
 
-        # Reference range text
         if ref_low is not None and ref_high is not None:
             ref_text = f"(Ref: {ref_low}–{ref_high} {unit})"
         else:
@@ -103,13 +98,12 @@ def _format_per_test_section(parsed_labs: Dict[str, float]) -> List[str]:
         if explanation.strip():
             lines.append(f"- {explanation.strip()}\n")
 
-        lines.append("")  # spacing
+        lines.append("")  
 
     return lines
 
 
 def _list_present_tests(parsed_labs: Dict[str, float], keys: List[str]) -> str:
-    """Return a short human-readable list of tests that are actually present in this report."""
     present = []
     for k in keys:
         if k in parsed_labs:
@@ -126,13 +120,7 @@ def _list_present_tests(parsed_labs: Dict[str, float], keys: List[str]) -> str:
 
 def _home_care_guidance(parsed_labs: Dict[str, float],
                         conditions: List[str]) -> List[str]:
-    """
-    Create case-specific home/lifestyle guidance *only* for conditions
-    that the model has actually tagged.
 
-    Nothing here is diagnostic; it simply links abnormal patterns to
-    very conservative, supportive home advice.
-    """
     lines: List[str] = []
     lines.append("## 🏠 Home and Lifestyle Guidance (Based on This Pattern)\n")
 
@@ -144,7 +132,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
         )
         return lines
 
-    # --- Anemia pattern ---
     if "anemia" in conditions:
         tests_used = _list_present_tests(parsed_labs, ["hemoglobin", "mcv", "mch", "rdw"])
         if tests_used:
@@ -160,7 +147,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "seek urgent medical care rather than only relying on diet changes.\n"
         )
 
-    # --- Diabetes / high sugars pattern ---
     if "diabetes_poor_control" in conditions or "diabetes_borderline" in conditions:
         tests_used = _list_present_tests(parsed_labs, ["fasting_glucose", "pp_glucose", "hba1c"])
         if tests_used:
@@ -174,10 +160,9 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "- Do **not** change diabetes medicines or insulin doses on your own; any change should be guided by your doctor.\n"
         )
 
-    # --- Lipid profile pattern ---
     if "lipid_issue" in conditions:
         tests_used = _list_present_tests(parsed_labs,
-                                         ["total_cholesterol", "triglycerides", "hdl", "ldl"])
+                                        ["total_cholesterol", "triglycerides", "hdl", "ldl"])
         if tests_used:
             lines.append(f"### Cholesterol / triglyceride pattern suggested by {tests_used}\n")
         else:
@@ -189,10 +174,9 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "- Discuss with your doctor whether long-term lifestyle changes or medicines are needed for your level of risk.\n"
         )
 
-    # --- Liver pattern ---
     if "liver_issue" in conditions:
         tests_used = _list_present_tests(parsed_labs,
-                                         ["total_bilirubin", "direct_bilirubin", "sgpt", "sgot", "alp", "gamma_gt"])
+                                        ["total_bilirubin", "direct_bilirubin", "sgpt", "sgot", "alp", "gamma_gt"])
         if tests_used:
             lines.append(f"### Liver-related pattern suggested by {tests_used}\n")
         else:
@@ -205,7 +189,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "seek medical attention quickly.\n"
         )
 
-    # --- Kidney pattern ---
     if "kidney_issue" in conditions:
         tests_used = _list_present_tests(parsed_labs, ["creatinine", "urea", "uric_acid"])
         if tests_used:
@@ -220,7 +203,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "- If you notice swelling of feet/face, very reduced urine output or breathlessness, seek prompt medical help.\n"
         )
 
-    # --- Thyroid pattern ---
     if "thyroid_hypo_pattern" in conditions or "thyroid_hyper_pattern" in conditions:
         tests_used = _list_present_tests(parsed_labs, ["tsh", "t3", "t4"])
         if tests_used:
@@ -234,7 +216,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "to discuss with your doctor.\n"
         )
 
-    # --- Inflammation pattern ---
     if "inflammation_marker_raised" in conditions:
         tests_used = _list_present_tests(parsed_labs, ["crp", "esr"])
         if tests_used:
@@ -246,7 +227,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "- Focus on rest, adequate hydration and following your doctor’s advice on further tests or antibiotics if needed.\n"
         )
 
-    # --- Vitamins pattern ---
     vitamin_conditions = [c for c in conditions if c in ("vitamin_d_low", "vitamin_b12_low")]
     if vitamin_conditions:
         tests_used = _list_present_tests(parsed_labs, ["vitamin_d", "vitamin_b12"])
@@ -261,7 +241,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
             "are individual.\n"
         )
 
-    # Final reminder that this is not treatment
     lines.append(
         "\nThe above points are **supportive lifestyle suggestions based on the patterns detected in this report**. "
         "They are **not a treatment plan**. Never start, stop or change medicines based only on this summary.\n"
@@ -271,7 +250,6 @@ def _home_care_guidance(parsed_labs: Dict[str, float],
 
 
 def _when_to_seek_help_section() -> List[str]:
-    """Generic but important safety net guidance."""
     lines: List[str] = []
 
     lines.append("## 🧑‍⚕️ When to See a Doctor or Visit a Hospital\n")
@@ -295,37 +273,25 @@ def _when_to_seek_help_section() -> List[str]:
 
 
 def generate_interpretation_full(parsed_labs: Dict[str, float],
-                                 ml_outputs: Dict[str, Any]) -> str:
-    """
-    Main interpretation function:
-    - Intro + overall assessment
-    - Per-test explanations (numeric + ranges)
-    - Condition-specific home/lifestyle guidance (based ONLY on model tags)
-    - Generic safety / when-to-seek-help guidance
-    """
+                                ml_outputs: Dict[str, Any]) -> str:
+
     lines: List[str] = []
 
-    # 0. Intro
     lines.append("## 🧾 Detailed Summary of Your Lab Report\n")
     lines.append(
         "This explanation is generated automatically to help you understand the numbers on your lab report. "
         "It is **not a diagnosis** and cannot replace a consultation with a qualified doctor.\n"
     )
 
-    # 1. Overall risk + anomaly
     lines.extend(_format_overall_section(ml_outputs))
 
-    # 2. Per-test explanations
     lines.extend(_format_per_test_section(parsed_labs))
 
-    # 3. Home & lifestyle guidance, tied to detected conditions only
     conditions: List[str] = ml_outputs.get("conditions", []) or []
     lines.extend(_home_care_guidance(parsed_labs, conditions))
 
-    # 4. When to seek medical help
     lines.extend(_when_to_seek_help_section())
 
-    # 5. Final disclaimer
     lines.append("---\n")
     lines.append(
         "⚠️ **Important:** This tool does not know your full medical history, current medicines or physical examination findings. "

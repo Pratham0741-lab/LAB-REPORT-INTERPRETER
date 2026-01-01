@@ -1,7 +1,6 @@
 # interpret_config.py
 from typing import Dict, Any
 
-# --- ADVANCED ALIAS SYSTEM (works for ANY type of report) ---
 TEST_ALIASES = {
     "hemoglobin": ["hemoglobin", "hb", "hgb", "haemoglobin"],
     "wbc": ["wbc", "white blood cell", "white blood cells", "total leucocyte count", "tlc"],
@@ -12,37 +11,30 @@ TEST_ALIASES = {
     "mch": ["mch", "mean corpuscular hemoglobin"],
     "mchc": ["mchc", "mean corpuscular hemoglobin concentration"],
 
-    # Metabolic
     "glucose_fasting": ["glucose fasting", "fbs", "fasting", "fasting blood sugar"],
     "glucose_random": ["random glucose", "rbs"],
     "hba1c": ["hba1c", "glycated hemoglobin"],
 
-    # Lipids
     "tchol": ["total cholesterol", "cholesterol total", "chol", "tchol"],
     "ldl": ["ldl", "low density lipoprotein"],
     "hdl": ["hdl", "high density lipoprotein"],
     "triglycerides": ["triglyceride", "tg", "trigs"],
 
-    # Kidney
     "creatinine": ["creatinine", "cr"],
     "bun": ["bun", "urea", "blood urea"],
 
-    # Liver
     "alt": ["alt", "sgpt"],
     "ast": ["ast", "sgot"],
     "bilirubin_total": ["bilirubin total", "total bilirubin"],
 
-    # Thyroid
     "tsh": ["tsh", "thyroid stimulating hormone"],
     "t3": ["t3"],
     "t4": ["t4"],
 
-    # Infection markers
     "crp": ["crp", "c-reactive protein"],
     "esr": ["esr", "erythrocyte sedimentation rate"],
 }
 
-# --- FULL TEST RANGES + MESSAGES (no external file needed) ---
 TEST_CONFIG: Dict[str, Dict[str, Any]] = {
     "hemoglobin": {
         "label": "Hemoglobin",
@@ -77,7 +69,6 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High platelets may occur due to inflammation or other conditions.",
     },
 
-    # Lipids
     "tchol": {
         "label": "Total Cholesterol",
         "group": "Lipids",
@@ -111,7 +102,6 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High triglycerides can indicate metabolic issues.",
     },
 
-    # Kidney
     "creatinine": {
         "label": "Creatinine",
         "group": "Kidney",
@@ -129,7 +119,6 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High BUN may indicate kidney issues or dehydration.",
     },
 
-    # Liver
     "alt": {
         "label": "ALT",
         "group": "Liver",
@@ -155,7 +144,6 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High bilirubin may indicate jaundice or liver dysfunction.",
     },
 
-    # Thyroid
     "tsh": {
         "label": "TSH",
         "group": "Thyroid",
@@ -181,7 +169,6 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High T4 suggests hyperthyroidism.",
     },
 
-    # Infection markers
     "crp": {
         "label": "CRP",
         "group": "Inflammation",
@@ -199,8 +186,7 @@ TEST_CONFIG: Dict[str, Dict[str, Any]] = {
         "high_msg": "High ESR suggests inflammation or infection.",
     },
 }
-# Optional backward compatibility (old code expects this)
-# Build LAB_METADATA in the format expected by ml_layer.py and llm_layer.py
+
 LAB_METADATA: Dict[str, Dict[str, Any]] = {}
 
 for key, cfg in TEST_CONFIG.items():
@@ -215,7 +201,6 @@ for key, cfg in TEST_CONFIG.items():
         "high_note": cfg.get("high_msg", ""),
     }
 
-# Extra keys so it matches the names used by the parser / frontend
 ALIAS_KEYS = {
     "total_cholesterol": "tchol",
     "total_bilirubin": "bilirubin_total",
@@ -226,7 +211,6 @@ for new_key, base_key in ALIAS_KEYS.items():
     if base_key in LAB_METADATA:
         LAB_METADATA[new_key] = LAB_METADATA[base_key]
 
-# Optional helpers if you still need them anywhere
 SUPPORTED_TESTS = list(TEST_CONFIG.keys())
 ALIAS_MAP = TEST_ALIASES
 UNITS = {k: v["unit"] for k, v in TEST_CONFIG.items()}

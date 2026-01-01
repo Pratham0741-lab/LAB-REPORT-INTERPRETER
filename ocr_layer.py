@@ -1,4 +1,4 @@
-# backend/ocr_layer.py
+# ocr_layer.py
 from typing import Dict, List
 
 import cv2
@@ -8,7 +8,6 @@ import pytesseract
 
 
 def _preprocess_image(img: np.ndarray) -> np.ndarray:
-    """Basic preprocessing to help OCR on scanned lab reports."""
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.medianBlur(gray, 3)
     th = cv2.adaptiveThreshold(
@@ -22,7 +21,6 @@ def _preprocess_image(img: np.ndarray) -> np.ndarray:
 
 
 def _images_from_bytes(file_bytes: bytes, file_type: str) -> List[np.ndarray]:
-    """Return list of OpenCV images for PDF or image file."""
     if file_type == "image":
         arr = np.frombuffer(file_bytes, np.uint8)
         img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
@@ -41,14 +39,7 @@ def _images_from_bytes(file_bytes: bytes, file_type: str) -> List[np.ndarray]:
 
 
 def ocr_image_bytes(file_bytes: bytes, file_type: str = "pdf") -> Dict:
-    """
-    Run OCR on given file bytes.
-    Returns:
-        {
-          "pages": [{"page_number": int, "text": str}, ...],
-          "full_text": "..."
-        }
-    """
+
     images = _images_from_bytes(file_bytes, file_type)
     pages = []
     full_text_parts = []

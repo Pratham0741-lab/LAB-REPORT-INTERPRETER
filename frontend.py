@@ -1,11 +1,4 @@
 # frontend.py
-"""
-Simple CLI helper to test the backend without Streamlit.
-
-Usage:
-    python frontend.py path/to/report.pdf
-"""
-
 import sys
 import requests
 import json

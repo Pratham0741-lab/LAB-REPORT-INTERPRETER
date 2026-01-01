@@ -1,4 +1,4 @@
-# backend/parsing_layer.py
+# parsing_layer.py
 from typing import Dict, Iterable, Any
 import re
 
@@ -6,9 +6,7 @@ from lab_config import LAB_NAME_ALIASES
 
 
 def _get_page_text(page: Any) -> str:
-    """
-    Support both dict-like pages ({'text': ...}) and Pydantic models (page.text).
-    """
+
     if isinstance(page, dict):
         return str(page.get("text", ""))
     return str(getattr(page, "text", ""))
@@ -57,7 +55,6 @@ def extract_labs_from_text(ocr_pages: Iterable[Any]) -> Dict[str, float]:
             except ValueError:
                 continue
 
-            # Latest occurrence wins
             parsed_labs[key] = value
 
     return parsed_labs

@@ -3,8 +3,8 @@ import re
 from typing import Optional, Tuple
 
 VALUE_PATTERNS = [
-    r"(-?\d+\.\d+)",          # decimals
-    r"(-?\d+)",               # integers
+    r"(-?\d+\.\d+)",          
+    r"(-?\d+)",               
 ]
 
 UNIT_PATTERNS = [
@@ -13,13 +13,10 @@ UNIT_PATTERNS = [
 ]
 
 def extract_value_unit(text: str) -> Tuple[Optional[float], Optional[str]]:
-    """
-    Extracts both numeric value and unit from ANY messy text string.
-    """
+
     value = None
     unit = None
 
-    # Find value
     for vp in VALUE_PATTERNS:
         match = re.search(vp, text, re.IGNORECASE)
         if match:
@@ -29,7 +26,6 @@ def extract_value_unit(text: str) -> Tuple[Optional[float], Optional[str]]:
             except:
                 continue
 
-    # Find unit
     for up in UNIT_PATTERNS:
         um = re.search(up, text, re.IGNORECASE)
         if um:
